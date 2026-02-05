@@ -5,7 +5,6 @@ import {
   FileText,
   DollarSign,
   BarChart3,
-  Settings,
   Menu,
   X,
   LogOut,
@@ -13,8 +12,11 @@ import {
   Calendar,
   ChevronRight,
 } from 'lucide-react';
-import { useAuth } from '../../lib/auth-context';
+import { useAuth } from '../../core/auth/AuthContext';
 import { Button } from '../ui/Button';
+import { canAccessScope, hasAnyPermission } from '../../core/rbac/rbac';
+import { getRoutePermission } from '../../core/rbac/routePermissions';
+import { Scope } from '../../core/rbac/types';
 
 interface AppShellProps {
   children: ReactNode;
@@ -22,14 +24,15 @@ interface AppShellProps {
 
 export function AppShell({ children }: AppShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const { user, signOut } = useAuth();
+  const { session, user, signOut } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
-  const navigation = [
+  const allNavigation = [
     {
       name: 'Portal do Cliente',
       icon: FileText,
+      scope: 'PORTAL' as Scope,
       items: [
         { name: '🏠 Home', href: '/portal' },
         { name: 'Atualização em Lote', href: '/portal/atualizacao-lote' },
@@ -48,6 +51,7 @@ export function AppShell({ children }: AppShellProps) {
     {
       name: 'Gestão de Contratos',
       icon: Building2,
+      scope: 'BACKOFFICE' as Scope,
       items: [
         { name: '🏠 Home', href: '/contratos' },
         { name: 'Empresas', href: '/contratos/empresas' },
@@ -62,6 +66,7 @@ export function AppShell({ children }: AppShellProps) {
     {
       name: 'Faturamento',
       icon: DollarSign,
+      scope: 'BACKOFFICE' as Scope,
       items: [
         { name: '🏠 Home', href: '/faturamento' },
         { name: 'Pisos por Categoria', href: '/faturamento/pisos' },
@@ -86,6 +91,7 @@ export function AppShell({ children }: AppShellProps) {
     {
       name: 'Relatórios',
       icon: BarChart3,
+      scope: 'BACKOFFICE' as Scope,
       items: [
         { name: 'Dashboard', href: '/relatorios/dashboard' },
         { name: 'Integrações', href: '/relatorios/integracoes' },
@@ -94,6 +100,38 @@ export function AppShell({ children }: AppShellProps) {
       roles: ['admin', 'operational', 'company'],
     },
   ];
+
+  const navigation = allNavigation.filter((section) => {
+    if (session) {
+      if (!canAccessScope(session, section.scope)) return false;
+
+      const visibleItems = section.items.filter((item) => {
+        const routePermission = getRoutePermission(item.href);
+        if (!routePermission) return true;
+        return hasAnyPermission(session, routePermission.permissions);
+      });
+
+      return visibleItems.length > 0;
+    }
+
+    if (user && section.roles.includes(user.role)) {
+      return true;
+    }
+
+    return false;
+  }).map((section) => {
+    if (session) {
+      return {
+        ...section,
+        items: section.items.filter((item) => {
+          const routePermission = getRoutePermission(item.href);
+          if (!routePermission) return true;
+          return hasAnyPermission(session, routePermission.permissions);
+        }),
+      };
+    }
+    return section;
+  });
 
   const pathSegments = location.pathname.split('/').filter(Boolean);
   const breadcrumbs = pathSegments.map((segment, index) => {
@@ -128,10 +166,7 @@ export function AppShell({ children }: AppShellProps) {
         </div>
 
         <nav className="flex-1 overflow-y-auto p-4 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
-          {navigation.map((section) => {
-            if (!section.roles.includes(user?.role || '')) return null;
-
-            return (
+          {navigation.map((section) => (
               <div key={section.name} className="mb-6">
                 <div className="flex items-center gap-2 px-3 py-2 text-xs font-bold text-white/60 uppercase tracking-wider">
                   <section.icon className="h-4 w-4" />
@@ -172,8 +207,7 @@ export function AppShell({ children }: AppShellProps) {
                   })}
                 </ul>
               </div>
-            );
-          })}
+            ))}
         </nav>
 
         <div className="p-4 border-t border-white/10 bg-black/10">
@@ -231,9 +265,21 @@ export function AppShell({ children }: AppShellProps) {
                     <User className="h-5 w-5 text-white" />
                   </div>
                   <div className="text-sm">
-                    <p className="font-semibold text-neutral-900">{user?.full_name}</p>
+                    <p className="font-semibold text-neutral-900">{session?.name || user?.full_name}</p>
                     <p className="text-xs text-neutral-500">
-                      {user?.role === 'admin' ? 'Admin SysMap' : user?.role === 'operational' ? 'Operacional' : 'Cliente'}
+                      {session?.isAdminMaster
+                        ? 'Admin Master'
+                        : session?.isClientAdmin
+                        ? 'Admin do Cliente'
+                        : session?.scope === 'BACKOFFICE'
+                        ? 'Backoffice'
+                        : session?.scope === 'PORTAL'
+                        ? 'Portal'
+                        : user?.role === 'admin'
+                        ? 'Admin SysMap'
+                        : user?.role === 'operational'
+                        ? 'Operacional'
+                        : 'Cliente'}
                     </p>
                   </div>
                 </div>

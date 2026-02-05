@@ -3,7 +3,7 @@ import { Gift, Calendar, CheckCircle, Award } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { supabase } from '../../lib/supabase';
-import { useAuth } from '../../lib/auth-context';
+import { useAuth } from '../../core/auth/AuthContext';
 import { toast } from 'sonner';
 
 interface Campaign {

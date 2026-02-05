@@ -6,7 +6,7 @@ import { Input } from '../../components/ui/Input';
 import { Badge } from '../../components/ui/Badge';
 import { Modal, ModalContent, ModalFooter } from '../../components/ui/Modal';
 import { supabase } from '../../lib/supabase';
-import { useAuth } from '../../lib/auth-context';
+import { useAuth } from '../../core/auth/AuthContext';
 import { toast } from 'sonner';
 
 interface CalculationPreview {
