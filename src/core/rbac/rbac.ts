@@ -58,3 +58,57 @@ export function canAccessRoute(session: UserSession | null, routeScope: Scope, r
 
   return hasAnyPermission(session, routePermissions);
 }
+
+// ==================== EFFECTIVE PERMISSIONS FOR MANAGED USERS ====================
+
+import type { ManagedUser, Role, EffectivePermission } from './types';
+
+export function getEffectivePermissions(user: ManagedUser, role: Role | null): EffectivePermission[] {
+  const permissionsMap = new Map<string, EffectivePermission>();
+
+  // Start with role permissions
+  if (role) {
+    role.permissions.forEach((permKey) => {
+      permissionsMap.set(permKey, {
+        key: permKey,
+        granted: true,
+        source: 'role',
+      });
+    });
+  }
+
+  // Apply overrides
+  Object.entries(user.overrides).forEach(([permKey, allowed]) => {
+    if (allowed) {
+      // Override grants permission
+      permissionsMap.set(permKey, {
+        key: permKey,
+        granted: true,
+        source: 'override-grant',
+      });
+    } else {
+      // Override denies permission (removes from role or explicitly denies)
+      permissionsMap.set(permKey, {
+        key: permKey,
+        granted: false,
+        source: 'override-deny',
+      });
+    }
+  });
+
+  return Array.from(permissionsMap.values());
+}
+
+export function hasEffectivePermission(user: ManagedUser, role: Role | null, permissionKey: string): boolean {
+  // Check override first
+  if (permissionKey in user.overrides) {
+    return user.overrides[permissionKey];
+  }
+
+  // Fall back to role
+  if (role) {
+    return role.permissions.includes(permissionKey);
+  }
+
+  return false;
+}

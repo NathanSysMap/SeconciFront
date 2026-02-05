@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
 import { AuthProvider } from './core/auth/AuthContext';
-import { ProtectedRoute, ScopeRoute } from './components/guards/RouteGuards';
+import { ProtectedRoute, ScopeRoute, PermissionRoute } from './components/guards/RouteGuards';
 import Login from './pages/Login';
 import Forbidden from './pages/Forbidden';
 import Home from './pages/Home';
@@ -43,6 +43,12 @@ import BillingAlerts from './pages/faturamento/BillingAlerts';
 import ReportsDashboard from './pages/relatorios/Dashboard';
 import Integrations from './pages/relatorios/Integrations';
 import About from './pages/relatorios/About';
+import AdminRoles from './pages/admin/AdminRoles';
+import AdminUsers from './pages/admin/AdminUsers';
+import AdminUserOverrides from './pages/admin/AdminUserOverrides';
+import PortalAdminRoles from './pages/portal/admin/PortalAdminRoles';
+import PortalAdminUsers from './pages/portal/admin/PortalAdminUsers';
+import PortalAdminUserOverrides from './pages/portal/admin/PortalAdminUserOverrides';
 
 const queryClient = new QueryClient();
 
@@ -78,6 +84,9 @@ function App() {
             <Route path="/portal/campanhas" element={<ProtectedRoute><ScopeRoute scope="PORTAL"><IncentiveCampaigns /></ScopeRoute></ProtectedRoute>} />
             <Route path="/portal/relatorios" element={<ProtectedRoute><ScopeRoute scope="PORTAL"><PortalReports /></ScopeRoute></ProtectedRoute>} />
             <Route path="/portal/alertas" element={<ProtectedRoute><ScopeRoute scope="PORTAL"><Alerts /></ScopeRoute></ProtectedRoute>} />
+            <Route path="/portal/admin/roles" element={<ProtectedRoute><ScopeRoute scope="PORTAL"><PermissionRoute permissions={['PORTAL.ADMIN.MANAGE_USERS']}><PortalAdminRoles /></PermissionRoute></ScopeRoute></ProtectedRoute>} />
+            <Route path="/portal/admin/users" element={<ProtectedRoute><ScopeRoute scope="PORTAL"><PermissionRoute permissions={['PORTAL.ADMIN.MANAGE_USERS']}><PortalAdminUsers /></PermissionRoute></ScopeRoute></ProtectedRoute>} />
+            <Route path="/portal/admin/users/overrides" element={<ProtectedRoute><ScopeRoute scope="PORTAL"><PermissionRoute permissions={['PORTAL.ADMIN.MANAGE_USERS']}><PortalAdminUserOverrides /></PermissionRoute></ScopeRoute></ProtectedRoute>} />
 
             <Route path="/contratos" element={<ProtectedRoute><ScopeRoute scope="BACKOFFICE"><ContratosHome /></ScopeRoute></ProtectedRoute>} />
             <Route path="/contratos/empresas" element={<ProtectedRoute><ScopeRoute scope="BACKOFFICE"><Companies /></ScopeRoute></ProtectedRoute>} />
@@ -107,6 +116,10 @@ function App() {
             <Route path="/relatorios/dashboard" element={<ProtectedRoute><ScopeRoute scope="BACKOFFICE"><ReportsDashboard /></ScopeRoute></ProtectedRoute>} />
             <Route path="/relatorios/integracoes" element={<ProtectedRoute><ScopeRoute scope="BACKOFFICE"><Integrations /></ScopeRoute></ProtectedRoute>} />
             <Route path="/relatorios/sobre" element={<ProtectedRoute><ScopeRoute scope="BACKOFFICE"><About /></ScopeRoute></ProtectedRoute>} />
+
+            <Route path="/admin/roles" element={<ProtectedRoute><ScopeRoute scope="BACKOFFICE"><PermissionRoute permissions={['BACKOFFICE.ADMIN.MANAGE_USERS']}><AdminRoles /></PermissionRoute></ScopeRoute></ProtectedRoute>} />
+            <Route path="/admin/users" element={<ProtectedRoute><ScopeRoute scope="BACKOFFICE"><PermissionRoute permissions={['BACKOFFICE.ADMIN.MANAGE_USERS']}><AdminUsers /></PermissionRoute></ScopeRoute></ProtectedRoute>} />
+            <Route path="/admin/users/overrides" element={<ProtectedRoute><ScopeRoute scope="BACKOFFICE"><PermissionRoute permissions={['BACKOFFICE.ADMIN.MANAGE_USERS']}><AdminUserOverrides /></PermissionRoute></ScopeRoute></ProtectedRoute>} />
           </Routes>
           <Toaster position="top-right" />
         </BrowserRouter>

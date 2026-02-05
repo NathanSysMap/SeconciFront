@@ -34,3 +34,32 @@ export interface LegacyUser {
   role: 'admin' | 'operational' | 'company';
   company_id?: string;
 }
+
+export interface Role {
+  id: string;
+  name: string;
+  description?: string;
+  scope: Scope;
+  tenantId: string | null;
+  permissions: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ManagedUser {
+  id: string;
+  name: string;
+  email: string;
+  scope: Scope;
+  tenantId: string | null;
+  roleId: string | null;
+  overrides: Record<string, boolean>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface EffectivePermission {
+  key: string;
+  granted: boolean;
+  source: 'role' | 'override-grant' | 'override-deny';
+}

@@ -11,6 +11,8 @@ import {
   User,
   Calendar,
   ChevronRight,
+  Shield,
+  Users,
 } from 'lucide-react';
 import { useAuth } from '../../core/auth/AuthContext';
 import { Button } from '../ui/Button';
@@ -98,6 +100,28 @@ export function AppShell({ children }: AppShellProps) {
         { name: 'Sobre a Aplicação', href: '/relatorios/sobre' },
       ],
       roles: ['admin', 'operational', 'company'],
+    },
+    {
+      name: 'Administração',
+      icon: Shield,
+      scope: 'BACKOFFICE' as Scope,
+      items: [
+        { name: 'Perfis (Backoffice)', href: '/admin/roles' },
+        { name: 'Usuários (Backoffice)', href: '/admin/users' },
+        { name: 'Exceções (Backoffice)', href: '/admin/users/overrides' },
+      ],
+      roles: ['admin'],
+    },
+    {
+      name: 'Administração',
+      icon: Shield,
+      scope: 'PORTAL' as Scope,
+      items: [
+        { name: 'Perfis (Portal)', href: '/portal/admin/roles' },
+        { name: 'Usuários (Portal)', href: '/portal/admin/users' },
+        { name: 'Exceções (Portal)', href: '/portal/admin/users/overrides' },
+      ],
+      roles: ['admin'],
     },
   ];
 

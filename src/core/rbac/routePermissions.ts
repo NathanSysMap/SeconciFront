@@ -154,6 +154,30 @@ export const ROUTE_PERMISSIONS: Record<string, RoutePermission> = {
     scope: 'BACKOFFICE',
     permissions: ['BACKOFFICE.RELATORIOS.VIEW'],
   },
+  '/admin/roles': {
+    scope: 'BACKOFFICE',
+    permissions: ['BACKOFFICE.ADMIN.MANAGE_USERS'],
+  },
+  '/admin/users': {
+    scope: 'BACKOFFICE',
+    permissions: ['BACKOFFICE.ADMIN.MANAGE_USERS'],
+  },
+  '/admin/users/overrides': {
+    scope: 'BACKOFFICE',
+    permissions: ['BACKOFFICE.ADMIN.MANAGE_USERS'],
+  },
+  '/portal/admin/roles': {
+    scope: 'PORTAL',
+    permissions: ['PORTAL.ADMIN.MANAGE_USERS'],
+  },
+  '/portal/admin/users': {
+    scope: 'PORTAL',
+    permissions: ['PORTAL.ADMIN.MANAGE_USERS'],
+  },
+  '/portal/admin/users/overrides': {
+    scope: 'PORTAL',
+    permissions: ['PORTAL.ADMIN.MANAGE_USERS'],
+  },
 };
 
 export function getRoutePermission(path: string): RoutePermission | null {
