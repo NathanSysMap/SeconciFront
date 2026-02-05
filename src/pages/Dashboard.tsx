@@ -21,30 +21,39 @@ export default function Dashboard() {
     if (session) {
       if (session.scope === 'PORTAL') {
         navigate('/portal', { replace: true });
+        return;
       } else if (session.scope === 'BACKOFFICE') {
         navigate('/contratos', { replace: true });
+        return;
       }
     }
+    loadStats();
   }, [session, navigate]);
 
-  useEffect(() => {
-    loadStats();
-  }, []);
-
   const loadStats = async () => {
-    const [companiesRes, employeesRes, invoicesRes, alertsRes] = await Promise.all([
-      supabase.from('companies').select('id', { count: 'exact', head: true }),
-      supabase.from('employees').select('id', { count: 'exact', head: true }),
-      supabase.from('invoices').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
-      supabase.from('alerts').select('id', { count: 'exact', head: true }).eq('status', 'active'),
-    ]);
+    try {
+      const [companiesRes, employeesRes, invoicesRes, alertsRes] = await Promise.all([
+        supabase.from('companies').select('id', { count: 'exact', head: true }),
+        supabase.from('employees').select('id', { count: 'exact', head: true }),
+        supabase.from('invoices').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+        supabase.from('alerts').select('id', { count: 'exact', head: true }).eq('status', 'active'),
+      ]);
 
-    setStats({
-      companies: companiesRes.count || 0,
-      employees: employeesRes.count || 0,
-      pendingInvoices: invoicesRes.count || 0,
-      activeAlerts: alertsRes.count || 0,
-    });
+      setStats({
+        companies: companiesRes.count || 0,
+        employees: employeesRes.count || 0,
+        pendingInvoices: invoicesRes.count || 0,
+        activeAlerts: alertsRes.count || 0,
+      });
+    } catch (error) {
+      console.log('Error loading stats:', error);
+      setStats({
+        companies: 0,
+        employees: 0,
+        pendingInvoices: 0,
+        activeAlerts: 0,
+      });
+    }
   };
 
   return (
