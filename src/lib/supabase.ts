@@ -1,17 +1,9 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './database.types';
+import { supabaseConfig } from './supabase-config';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('Supabase environment variables:', {
-    url: supabaseUrl ? 'presente' : 'ausente',
-    key: supabaseAnonKey ? 'presente' : 'ausente',
-    allEnv: import.meta.env
-  });
-  throw new Error('Missing Supabase environment variables - verifique o arquivo .env');
-}
+const supabaseUrl = supabaseConfig.url;
+const supabaseAnonKey = supabaseConfig.anonKey;
 
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   auth: {
