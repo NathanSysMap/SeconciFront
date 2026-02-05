@@ -1,10 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
-import { AuthProvider } from './core/auth/AuthContext';
-import { ProtectedRoute, ScopeRoute } from './components/guards/RouteGuards';
-import Login from './pages/Login';
-import Forbidden from './pages/Forbidden';
+import { AuthProvider, useAuth } from './lib/auth-context';
+import { AppShell } from './components/layout/AppShell';
 import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
 import PortalHome from './pages/portal/PortalHome';
@@ -46,67 +44,73 @@ import About from './pages/relatorios/About';
 
 const queryClient = new QueryClient();
 
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-primary"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/login" />;
+  }
+
+  return <AppShell>{children}</AppShell>;
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <BrowserRouter>
           <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/forbidden" element={<Forbidden />} />
-
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
 
-            <Route
-              path="/portal"
-              element={
-                <ProtectedRoute>
-                  <ScopeRoute scope="PORTAL">
-                    <PortalHome />
-                  </ScopeRoute>
-                </ProtectedRoute>
-              }
-            />
-            <Route path="/portal/atualizacao-lote" element={<ProtectedRoute><ScopeRoute scope="PORTAL"><BatchUpdate /></ScopeRoute></ProtectedRoute>} />
-            <Route path="/portal/atualizacao-individual" element={<ProtectedRoute><ScopeRoute scope="PORTAL"><IndividualUpdate /></ScopeRoute></ProtectedRoute>} />
-            <Route path="/portal/eventos-folha" element={<ProtectedRoute><ScopeRoute scope="PORTAL"><PayrollEvents /></ScopeRoute></ProtectedRoute>} />
-            <Route path="/portal/calculo-automatico" element={<ProtectedRoute><ScopeRoute scope="PORTAL"><AutomaticBilling /></ScopeRoute></ProtectedRoute>} />
-            <Route path="/portal/boletos" element={<ProtectedRoute><ScopeRoute scope="PORTAL"><Boletos /></ScopeRoute></ProtectedRoute>} />
-            <Route path="/portal/nfse" element={<ProtectedRoute><ScopeRoute scope="PORTAL"><NFSe /></ScopeRoute></ProtectedRoute>} />
-            <Route path="/portal/relatorios-movimentacao" element={<ProtectedRoute><ScopeRoute scope="PORTAL"><MovementReports /></ScopeRoute></ProtectedRoute>} />
-            <Route path="/portal/campanhas" element={<ProtectedRoute><ScopeRoute scope="PORTAL"><IncentiveCampaigns /></ScopeRoute></ProtectedRoute>} />
-            <Route path="/portal/relatorios" element={<ProtectedRoute><ScopeRoute scope="PORTAL"><PortalReports /></ScopeRoute></ProtectedRoute>} />
-            <Route path="/portal/alertas" element={<ProtectedRoute><ScopeRoute scope="PORTAL"><Alerts /></ScopeRoute></ProtectedRoute>} />
+            <Route path="/portal" element={<ProtectedRoute><PortalHome /></ProtectedRoute>} />
+            <Route path="/portal/atualizacao-lote" element={<ProtectedRoute><BatchUpdate /></ProtectedRoute>} />
+            <Route path="/portal/atualizacao-individual" element={<ProtectedRoute><IndividualUpdate /></ProtectedRoute>} />
+            <Route path="/portal/eventos-folha" element={<ProtectedRoute><PayrollEvents /></ProtectedRoute>} />
+            <Route path="/portal/calculo-automatico" element={<ProtectedRoute><AutomaticBilling /></ProtectedRoute>} />
+            <Route path="/portal/boletos" element={<ProtectedRoute><Boletos /></ProtectedRoute>} />
+            <Route path="/portal/nfse" element={<ProtectedRoute><NFSe /></ProtectedRoute>} />
+            <Route path="/portal/relatorios-movimentacao" element={<ProtectedRoute><MovementReports /></ProtectedRoute>} />
+            <Route path="/portal/campanhas" element={<ProtectedRoute><IncentiveCampaigns /></ProtectedRoute>} />
+            <Route path="/portal/relatorios" element={<ProtectedRoute><PortalReports /></ProtectedRoute>} />
+            <Route path="/portal/alertas" element={<ProtectedRoute><Alerts /></ProtectedRoute>} />
 
-            <Route path="/contratos" element={<ProtectedRoute><ScopeRoute scope="BACKOFFICE"><ContratosHome /></ScopeRoute></ProtectedRoute>} />
-            <Route path="/contratos/empresas" element={<ProtectedRoute><ScopeRoute scope="BACKOFFICE"><Companies /></ScopeRoute></ProtectedRoute>} />
-            <Route path="/contratos/funcionarios" element={<ProtectedRoute><ScopeRoute scope="BACKOFFICE"><Employees /></ScopeRoute></ProtectedRoute>} />
-            <Route path="/contratos/dependentes" element={<ProtectedRoute><ScopeRoute scope="BACKOFFICE"><Dependents /></ScopeRoute></ProtectedRoute>} />
-            <Route path="/contratos/regras" element={<ProtectedRoute><ScopeRoute scope="BACKOFFICE"><BillingRules /></ScopeRoute></ProtectedRoute>} />
-            <Route path="/contratos/vigencias" element={<ProtectedRoute><ScopeRoute scope="BACKOFFICE"><ContractValidities /></ScopeRoute></ProtectedRoute>} />
-            <Route path="/contratos/locais-regras" element={<ProtectedRoute><ScopeRoute scope="BACKOFFICE"><WorkLocationBillingRules /></ScopeRoute></ProtectedRoute>} />
+            <Route path="/contratos" element={<ProtectedRoute><ContratosHome /></ProtectedRoute>} />
+            <Route path="/contratos/empresas" element={<ProtectedRoute><Companies /></ProtectedRoute>} />
+            <Route path="/contratos/funcionarios" element={<ProtectedRoute><Employees /></ProtectedRoute>} />
+            <Route path="/contratos/dependentes" element={<ProtectedRoute><Dependents /></ProtectedRoute>} />
+            <Route path="/contratos/regras" element={<ProtectedRoute><BillingRules /></ProtectedRoute>} />
+            <Route path="/contratos/vigencias" element={<ProtectedRoute><ContractValidities /></ProtectedRoute>} />
+            <Route path="/contratos/locais-regras" element={<ProtectedRoute><WorkLocationBillingRules /></ProtectedRoute>} />
 
-            <Route path="/faturamento" element={<ProtectedRoute><ScopeRoute scope="BACKOFFICE"><FaturamentoHome /></ScopeRoute></ProtectedRoute>} />
-            <Route path="/faturamento/atualizacao-regras" element={<ProtectedRoute><ScopeRoute scope="BACKOFFICE"><CompanyRuleUpdate /></ScopeRoute></ProtectedRoute>} />
-            <Route path="/faturamento/aplicacao-penalidades" element={<ProtectedRoute><ScopeRoute scope="BACKOFFICE"><PenaltyApplication /></ScopeRoute></ProtectedRoute>} />
-            <Route path="/faturamento/ajustes-folha" element={<ProtectedRoute><ScopeRoute scope="BACKOFFICE"><PayrollAdjustments /></ScopeRoute></ProtectedRoute>} />
-            <Route path="/faturamento/amostragem" element={<ProtectedRoute><ScopeRoute scope="BACKOFFICE"><SamplingGroups /></ScopeRoute></ProtectedRoute>} />
-            <Route path="/faturamento/transferencia-modo" element={<ProtectedRoute><ScopeRoute scope="BACKOFFICE"><SamplingGroups /></ScopeRoute></ProtectedRoute>} />
-            <Route path="/faturamento/parametros-manuais" element={<ProtectedRoute><ScopeRoute scope="BACKOFFICE"><ManualBillingParams /></ScopeRoute></ProtectedRoute>} />
-            <Route path="/faturamento/lotes" element={<ProtectedRoute><ScopeRoute scope="BACKOFFICE"><BillingBatches /></ScopeRoute></ProtectedRoute>} />
-            <Route path="/faturamento/parametros-exportacao" element={<ProtectedRoute><ScopeRoute scope="BACKOFFICE"><ExportParameters /></ScopeRoute></ProtectedRoute>} />
-            <Route path="/faturamento/conferencia" element={<ProtectedRoute><ScopeRoute scope="BACKOFFICE"><BillingReview /></ScopeRoute></ProtectedRoute>} />
-            <Route path="/faturamento/grupos" element={<ProtectedRoute><ScopeRoute scope="BACKOFFICE"><EconomicGroups /></ScopeRoute></ProtectedRoute>} />
-            <Route path="/faturamento/alertas" element={<ProtectedRoute><ScopeRoute scope="BACKOFFICE"><BillingAlerts /></ScopeRoute></ProtectedRoute>} />
-            <Route path="/faturamento/pisos" element={<ProtectedRoute><ScopeRoute scope="BACKOFFICE"><CategoryMinimums /></ScopeRoute></ProtectedRoute>} />
-            <Route path="/faturamento/penalidades" element={<ProtectedRoute><ScopeRoute scope="BACKOFFICE"><Penalties /></ScopeRoute></ProtectedRoute>} />
-            <Route path="/faturamento/parametros" element={<ProtectedRoute><ScopeRoute scope="BACKOFFICE"><CalculationParameters /></ScopeRoute></ProtectedRoute>} />
-            <Route path="/faturamento/importacoes" element={<ProtectedRoute><ScopeRoute scope="BACKOFFICE"><ComplementaryImports /></ScopeRoute></ProtectedRoute>} />
+            <Route path="/faturamento" element={<ProtectedRoute><FaturamentoHome /></ProtectedRoute>} />
+            <Route path="/faturamento/atualizacao-regras" element={<ProtectedRoute><CompanyRuleUpdate /></ProtectedRoute>} />
+            <Route path="/faturamento/aplicacao-penalidades" element={<ProtectedRoute><PenaltyApplication /></ProtectedRoute>} />
+            <Route path="/faturamento/ajustes-folha" element={<ProtectedRoute><PayrollAdjustments /></ProtectedRoute>} />
+            <Route path="/faturamento/amostragem" element={<ProtectedRoute><SamplingGroups /></ProtectedRoute>} />
+            <Route path="/faturamento/transferencia-modo" element={<ProtectedRoute><SamplingGroups /></ProtectedRoute>} />
+            <Route path="/faturamento/parametros-manuais" element={<ProtectedRoute><ManualBillingParams /></ProtectedRoute>} />
+            <Route path="/faturamento/lotes" element={<ProtectedRoute><BillingBatches /></ProtectedRoute>} />
+            <Route path="/faturamento/parametros-exportacao" element={<ProtectedRoute><ExportParameters /></ProtectedRoute>} />
+            <Route path="/faturamento/conferencia" element={<ProtectedRoute><BillingReview /></ProtectedRoute>} />
+            <Route path="/faturamento/grupos" element={<ProtectedRoute><EconomicGroups /></ProtectedRoute>} />
+            <Route path="/faturamento/alertas" element={<ProtectedRoute><BillingAlerts /></ProtectedRoute>} />
+            <Route path="/faturamento/pisos" element={<ProtectedRoute><CategoryMinimums /></ProtectedRoute>} />
+            <Route path="/faturamento/penalidades" element={<ProtectedRoute><Penalties /></ProtectedRoute>} />
+            <Route path="/faturamento/parametros" element={<ProtectedRoute><CalculationParameters /></ProtectedRoute>} />
+            <Route path="/faturamento/importacoes" element={<ProtectedRoute><ComplementaryImports /></ProtectedRoute>} />
 
-            <Route path="/relatorios/dashboard" element={<ProtectedRoute><ScopeRoute scope="BACKOFFICE"><ReportsDashboard /></ScopeRoute></ProtectedRoute>} />
-            <Route path="/relatorios/integracoes" element={<ProtectedRoute><ScopeRoute scope="BACKOFFICE"><Integrations /></ScopeRoute></ProtectedRoute>} />
-            <Route path="/relatorios/sobre" element={<ProtectedRoute><ScopeRoute scope="BACKOFFICE"><About /></ScopeRoute></ProtectedRoute>} />
+            <Route path="/relatorios/dashboard" element={<ProtectedRoute><ReportsDashboard /></ProtectedRoute>} />
+            <Route path="/relatorios/integracoes" element={<ProtectedRoute><Integrations /></ProtectedRoute>} />
+            <Route path="/relatorios/sobre" element={<ProtectedRoute><About /></ProtectedRoute>} />
           </Routes>
           <Toaster position="top-right" />
         </BrowserRouter>

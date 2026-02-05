@@ -1,15 +1,13 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { Banner } from '../components/ui/Banner';
 import { Building2, Users, FileText, AlertTriangle, TrendingUp, DollarSign } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { useAuth } from '../core/auth/AuthContext';
+import { useAuth } from '../lib/auth-context';
 
 export default function Dashboard() {
-  const { session, user } = useAuth();
-  const navigate = useNavigate();
+  const { user } = useAuth();
   const [stats, setStats] = useState({
     companies: 0,
     employees: 0,
@@ -18,49 +16,30 @@ export default function Dashboard() {
   });
 
   useEffect(() => {
-    if (session) {
-      if (session.scope === 'PORTAL') {
-        navigate('/portal', { replace: true });
-        return;
-      } else if (session.scope === 'BACKOFFICE') {
-        navigate('/contratos', { replace: true });
-        return;
-      }
-    }
     loadStats();
-  }, [session, navigate]);
+  }, []);
 
   const loadStats = async () => {
-    try {
-      const [companiesRes, employeesRes, invoicesRes, alertsRes] = await Promise.all([
-        supabase.from('companies').select('id', { count: 'exact', head: true }),
-        supabase.from('employees').select('id', { count: 'exact', head: true }),
-        supabase.from('invoices').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
-        supabase.from('alerts').select('id', { count: 'exact', head: true }).eq('status', 'active'),
-      ]);
+    const [companiesRes, employeesRes, invoicesRes, alertsRes] = await Promise.all([
+      supabase.from('companies').select('id', { count: 'exact', head: true }),
+      supabase.from('employees').select('id', { count: 'exact', head: true }),
+      supabase.from('invoices').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+      supabase.from('alerts').select('id', { count: 'exact', head: true }).eq('status', 'active'),
+    ]);
 
-      setStats({
-        companies: companiesRes.count || 0,
-        employees: employeesRes.count || 0,
-        pendingInvoices: invoicesRes.count || 0,
-        activeAlerts: alertsRes.count || 0,
-      });
-    } catch (error) {
-      console.log('Error loading stats:', error);
-      setStats({
-        companies: 0,
-        employees: 0,
-        pendingInvoices: 0,
-        activeAlerts: 0,
-      });
-    }
+    setStats({
+      companies: companiesRes.count || 0,
+      employees: employeesRes.count || 0,
+      pendingInvoices: invoicesRes.count || 0,
+      activeAlerts: alertsRes.count || 0,
+    });
   };
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-neutral-900">
-          Bem-vindo, {session?.name || user?.full_name}
+          Bem-vindo, {user?.full_name}
         </h1>
         <p className="text-neutral-600 mt-2">
           Sistema de Faturamento Assistencial - Competência Out/2025
