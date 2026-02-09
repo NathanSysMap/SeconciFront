@@ -94,7 +94,7 @@ export default function PortalAdminRoles() {
   if (!tenantId) {
     return (
       <EmptyState
-        icon={<Shield className="w-12 h-12" />}
+        icon={Shield}
         title="Tenant não identificado"
         description="Não foi possível identificar o tenant da sessão"
       />
@@ -115,7 +115,7 @@ export default function PortalAdminRoles() {
 
       {roles.length === 0 ? (
         <EmptyState
-          icon={<Shield className="w-12 h-12" />}
+          icon={Shield}
           title="Nenhum perfil cadastrado"
           description="Crie perfis para organizar permissões de usuários"
         />

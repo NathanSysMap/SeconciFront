@@ -98,7 +98,7 @@ export default function AdminRoles() {
 
       {roles.length === 0 ? (
         <EmptyState
-          icon={<Shield className="w-12 h-12" />}
+          icon={Shield}
           title="Nenhum perfil cadastrado"
           description="Crie perfis para organizar permissões de usuários"
         />

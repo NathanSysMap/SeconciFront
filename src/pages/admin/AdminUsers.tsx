@@ -107,7 +107,7 @@ export default function AdminUsers() {
 
       {users.length === 0 ? (
         <EmptyState
-          icon={<Users className="w-12 h-12" />}
+          icon={Users}
           title="Nenhum usuário cadastrado"
           description="Crie usuários para gerenciar o acesso ao sistema"
         />

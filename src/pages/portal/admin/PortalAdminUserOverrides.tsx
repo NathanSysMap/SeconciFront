@@ -75,7 +75,7 @@ export default function PortalAdminUserOverrides() {
   if (!tenantId) {
     return (
       <EmptyState
-        icon={<Users className="w-12 h-12" />}
+        icon={Users}
         title="Tenant não identificado"
         description="Não foi possível identificar o tenant da sessão"
       />
@@ -136,7 +136,7 @@ export default function PortalAdminUserOverrides() {
             />
           ) : (
             <EmptyState
-              icon={<Users className="w-12 h-12" />}
+              icon={Users}
               title="Selecione um usuário"
               description="Escolha um usuário acima para gerenciar suas exceções de permissões"
             />

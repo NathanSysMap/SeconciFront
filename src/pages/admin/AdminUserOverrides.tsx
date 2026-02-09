@@ -121,7 +121,7 @@ export default function AdminUserOverrides() {
             />
           ) : (
             <EmptyState
-              icon={<Users className="w-12 h-12" />}
+              icon={Users}
               title="Selecione um usuário"
               description="Escolha um usuário acima para gerenciar suas exceções de permissões"
             />

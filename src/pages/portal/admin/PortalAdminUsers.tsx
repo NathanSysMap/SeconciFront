@@ -103,7 +103,7 @@ export default function PortalAdminUsers() {
   if (!tenantId) {
     return (
       <EmptyState
-        icon={<Users className="w-12 h-12" />}
+        icon={Users}
         title="Tenant não identificado"
         description="Não foi possível identificar o tenant da sessão"
       />
@@ -124,7 +124,7 @@ export default function PortalAdminUsers() {
 
       {users.length === 0 ? (
         <EmptyState
-          icon={<Users className="w-12 h-12" />}
+          icon={Users}
           title="Nenhum usuário cadastrado"
           description="Crie usuários para gerenciar o acesso ao sistema"
         />
