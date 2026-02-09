@@ -113,7 +113,7 @@ export default function AdminRoles() {
             <Card key={role.id} className="bg-white rounded-2xl border border-neutral-200 hover:shadow-lg transition-shadow duration-200 p-6">
               <div className="flex items-center justify-between gap-6">
                 <div className="flex items-center gap-4 flex-1 min-w-0">
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-4">
                     <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
                       <Shield className="w-5 h-5 text-white" />
                     </div>
