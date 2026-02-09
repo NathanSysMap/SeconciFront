@@ -110,24 +110,22 @@ export default function AdminRoles() {
       ) : (
         <div className="grid gap-4">
           {roles.map((role) => (
-            <Card key={role.id} className="bg-white rounded-2xl border border-neutral-200 hover:shadow-lg transition-shadow duration-200 p-6">
-              <div className="flex items-center justify-between gap-6">
+            <Card key={role.id} className="bg-white rounded-2xl border border-neutral-200 hover:shadow-lg transition-shadow duration-200">
+              <div className="p-6 flex items-center justify-between gap-6">
                 <div className="flex items-center gap-4 flex-1 min-w-0">
-                  <div className="flex items-center gap-4">
-                    <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
-                      <Shield className="w-5 h-5 text-white" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-lg font-semibold text-gray-900 truncate">{role.name}</h3>
-                      {role.description && (
-                        <p className="text-gray-600 mt-1 line-clamp-2">{role.description}</p>
-                      )}
-                      <div className="flex items-center gap-4 mt-3">
-                        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
-                          {role.permissions.length} {role.permissions.length === 1 ? 'permissão' : 'permissões'}
-                        </span>
-                        <span className="text-xs text-gray-500">Escopo: Backoffice</span>
-                      </div>
+                  <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                    <Shield className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-lg font-semibold text-gray-900 truncate">{role.name}</h3>
+                    {role.description && (
+                      <p className="text-gray-600 mt-1 line-clamp-2">{role.description}</p>
+                    )}
+                    <div className="flex items-center gap-4 mt-3">
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                        {role.permissions.length} {role.permissions.length === 1 ? 'permissão' : 'permissões'}
+                      </span>
+                      <span className="text-xs text-gray-500">Escopo: Backoffice</span>
                     </div>
                   </div>
                 </div>

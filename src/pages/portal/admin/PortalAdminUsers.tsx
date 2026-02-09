@@ -139,8 +139,8 @@ export default function PortalAdminUsers() {
             const overrideCount = getOverrideCount(user);
 
             return (
-              <Card key={user.id} className="hover:shadow-lg transition-shadow duration-200 p-6">
-                <div className="flex items-center justify-between gap-6">
+              <Card key={user.id} className="hover:shadow-lg transition-shadow duration-200">
+                <div className="p-6 flex items-center justify-between gap-6">
                   <div className="flex items-center gap-4 flex-1 min-w-0">
                     <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-gray-500 to-gray-600 rounded-lg flex items-center justify-center">
                       <Users className="w-6 h-6 text-white" />
