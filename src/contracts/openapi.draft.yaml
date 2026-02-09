@@ -1,0 +1,526 @@
+openapi: 3.0.0
+info:
+  title: Seconci-SP RBAC API
+  version: 1.0.0
+  description: API para gerenciamento de perfis, usuários, permissões e exceções do sistema Seconci-SP
+
+servers:
+  - url: https://api.seconci.example.com/v1
+    description: Servidor de produção
+  - url: http://localhost:3000/v1
+    description: Servidor de desenvolvimento
+
+paths:
+  /roles:
+    get:
+      summary: Listar perfis
+      description: Retorna lista de perfis filtrados por escopo e tenantId
+      parameters:
+        - name: scope
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [BACKOFFICE, PORTAL]
+        - name: tenantId
+          in: query
+          required: false
+          schema:
+            type: string
+            nullable: true
+          description: ID do tenant (obrigatório para scope PORTAL)
+      responses:
+        '200':
+          description: Lista de perfis
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Role'
+
+    post:
+      summary: Criar perfil
+      description: Cria um novo perfil no sistema
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRoleInput'
+      responses:
+        '201':
+          description: Perfil criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Role'
+        '400':
+          description: Dados inválidos
+
+  /roles/{id}:
+    get:
+      summary: Obter perfil por ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Perfil encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Role'
+        '404':
+          description: Perfil não encontrado
+
+    put:
+      summary: Atualizar perfil
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRoleInput'
+      responses:
+        '200':
+          description: Perfil atualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Role'
+        '404':
+          description: Perfil não encontrado
+
+    delete:
+      summary: Excluir perfil
+      description: Exclui um perfil. Falha se houver usuários vinculados.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Perfil excluído com sucesso
+        '400':
+          description: Perfil possui usuários vinculados
+        '404':
+          description: Perfil não encontrado
+
+  /users:
+    get:
+      summary: Listar usuários
+      description: Retorna lista de usuários filtrados por escopo e tenantId
+      parameters:
+        - name: scope
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [BACKOFFICE, PORTAL]
+        - name: tenantId
+          in: query
+          required: false
+          schema:
+            type: string
+            nullable: true
+          description: ID do tenant (obrigatório para scope PORTAL)
+      responses:
+        '200':
+          description: Lista de usuários
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+
+    post:
+      summary: Criar usuário
+      description: |
+        Cria um novo usuário no sistema.
+        Regras:
+        - Se scope=PORTAL, tenantId é obrigatório e deve corresponder ao tenant do usuário autenticado
+        - Se scope=BACKOFFICE, tenantId deve ser null
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserInput'
+      responses:
+        '201':
+          description: Usuário criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Dados inválidos
+
+  /users/{id}:
+    get:
+      summary: Obter usuário por ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Usuário encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: Usuário não encontrado
+
+    put:
+      summary: Atualizar usuário
+      description: |
+        Atualiza dados do usuário.
+        Regras:
+        - O campo tenantId NÃO pode ser alterado após a criação
+        - O campo email NÃO pode ser alterado após a criação
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserInput'
+      responses:
+        '200':
+          description: Usuário atualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: Usuário não encontrado
+
+    delete:
+      summary: Excluir usuário
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Usuário excluído com sucesso
+        '404':
+          description: Usuário não encontrado
+
+  /users/{id}/role:
+    put:
+      summary: Atribuir perfil a usuário
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                roleId:
+                  type: string
+                  nullable: true
+                  description: ID do perfil (null remove o perfil)
+      responses:
+        '200':
+          description: Perfil atribuído com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: Usuário ou perfil não encontrado
+
+  /users/{id}/overrides:
+    get:
+      summary: Obter exceções de permissões do usuário
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de exceções
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserOverride'
+        '404':
+          description: Usuário não encontrado
+
+    put:
+      summary: Atualizar exceções de permissões
+      description: |
+        Atualiza exceções de permissões em lote.
+        Regras:
+        - allowed=true: concede permissão específica
+        - allowed=false: nega permissão específica
+        - allowed=null: remove a exceção (volta a herdar do perfil)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                changes:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      permissionKey:
+                        type: string
+                      allowed:
+                        type: boolean
+                        nullable: true
+      responses:
+        '200':
+          description: Exceções atualizadas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserOverride'
+        '404':
+          description: Usuário não encontrado
+
+  /permissions:
+    get:
+      summary: Listar catálogo de permissões
+      description: Retorna todas as permissões disponíveis, opcionalmente filtradas por escopo
+      parameters:
+        - name: scope
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [BACKOFFICE, PORTAL]
+      responses:
+        '200':
+          description: Catálogo de permissões
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Permission'
+
+components:
+  schemas:
+    Role:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        scope:
+          type: string
+          enum: [BACKOFFICE, PORTAL]
+        tenantId:
+          type: string
+          nullable: true
+        permissions:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreateRoleInput:
+      type: object
+      required:
+        - name
+        - scope
+        - permissions
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        scope:
+          type: string
+          enum: [BACKOFFICE, PORTAL]
+        tenantId:
+          type: string
+          nullable: true
+          description: Obrigatório para scope PORTAL
+        permissions:
+          type: array
+          items:
+            type: string
+
+    UpdateRoleInput:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        permissions:
+          type: array
+          items:
+            type: string
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+        scope:
+          type: string
+          enum: [BACKOFFICE, PORTAL]
+        tenantId:
+          type: string
+          nullable: true
+        roleId:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [ACTIVE, INACTIVE]
+        phone:
+          type: string
+          nullable: true
+        jobTitle:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreateUserInput:
+      type: object
+      required:
+        - name
+        - email
+        - scope
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        scope:
+          type: string
+          enum: [BACKOFFICE, PORTAL]
+        tenantId:
+          type: string
+          nullable: true
+          description: Obrigatório para scope PORTAL
+        roleId:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [ACTIVE, INACTIVE]
+          default: ACTIVE
+        phone:
+          type: string
+        jobTitle:
+          type: string
+
+    UpdateUserInput:
+      type: object
+      properties:
+        name:
+          type: string
+        roleId:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [ACTIVE, INACTIVE]
+        phone:
+          type: string
+        jobTitle:
+          type: string
+
+    UserOverride:
+      type: object
+      properties:
+        userId:
+          type: string
+        permissionKey:
+          type: string
+        allowed:
+          type: boolean
+
+    Permission:
+      type: object
+      properties:
+        key:
+          type: string
+        scope:
+          type: string
+          enum: [BACKOFFICE, PORTAL]
+        module:
+          type: string
+        action:
+          type: string
+        description:
+          type: string
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - bearerAuth: []

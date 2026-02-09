@@ -7,7 +7,7 @@ import { RoleFormModal, RoleFormData } from '../../components/rbac/RoleFormModal
 import { PermissionMatrix } from '../../components/rbac/PermissionMatrix';
 import { Modal } from '../../components/ui/Modal';
 import type { Role } from '../../core/rbac/types';
-import { listRoles, createRole, updateRole, deleteRole } from '../../core/rbac/mockStore';
+import { rolesService } from '../../services';
 import { toast } from 'sonner';
 
 export default function AdminRoles() {
@@ -21,9 +21,9 @@ export default function AdminRoles() {
     loadRoles();
   }, []);
 
-  const loadRoles = () => {
-    const data = listRoles('BACKOFFICE', null);
-    setRoles(data);
+  const loadRoles = async () => {
+    const data = await rolesService.list('BACKOFFICE', null);
+    setRoles(data as Role[]);
   };
 
   const handleCreate = () => {
@@ -36,35 +36,39 @@ export default function AdminRoles() {
     setIsFormOpen(true);
   };
 
-  const handleFormSubmit = (data: RoleFormData) => {
-    if (editingRole) {
-      updateRole(editingRole.id, {
-        name: data.name,
-        description: data.description,
-      });
-      toast.success('Perfil atualizado com sucesso!');
-    } else {
-      createRole({
-        name: data.name,
-        description: data.description,
-        scope: 'BACKOFFICE',
-        tenantId: null,
-        permissions: [],
-      });
-      toast.success('Perfil criado com sucesso!');
+  const handleFormSubmit = async (data: RoleFormData) => {
+    try {
+      if (editingRole) {
+        await rolesService.update(editingRole.id, {
+          name: data.name,
+          description: data.description,
+        });
+        toast.success('Perfil atualizado com sucesso!');
+      } else {
+        await rolesService.create({
+          name: data.name,
+          description: data.description,
+          scope: 'BACKOFFICE',
+          tenantId: null,
+          permissions: [],
+        });
+        toast.success('Perfil criado com sucesso!');
+      }
+      setIsFormOpen(false);
+      loadRoles();
+    } catch (error) {
+      toast.error('Erro ao salvar perfil');
     }
-    setIsFormOpen(false);
-    loadRoles();
   };
 
-  const handleDelete = (role: Role) => {
+  const handleDelete = async (role: Role) => {
     if (confirm(`Tem certeza que deseja excluir o perfil "${role.name}"?`)) {
-      const result = deleteRole(role.id);
-      if (result.success) {
+      try {
+        await rolesService.delete(role.id);
         toast.success('Perfil excluído com sucesso!');
         loadRoles();
-      } else {
-        toast.error(result.error || 'Erro ao excluir perfil');
+      } catch (error: any) {
+        toast.error(error.message || 'Erro ao excluir perfil');
       }
     }
   };
@@ -74,13 +78,17 @@ export default function AdminRoles() {
     setIsPermissionsOpen(true);
   };
 
-  const handlePermissionsChange = (permissions: string[]) => {
+  const handlePermissionsChange = async (permissions: string[]) => {
     if (selectedRole) {
-      updateRole(selectedRole.id, { permissions });
-      const updated = { ...selectedRole, permissions };
-      setSelectedRole(updated);
-      toast.success('Permissões atualizadas!');
-      loadRoles();
+      try {
+        await rolesService.update(selectedRole.id, { permissions });
+        const updated = { ...selectedRole, permissions };
+        setSelectedRole(updated);
+        toast.success('Permissões atualizadas!');
+        loadRoles();
+      } catch (error) {
+        toast.error('Erro ao atualizar permissões');
+      }
     }
   };
 

@@ -189,3 +189,25 @@ export function getRoutesByScope(scope: Scope): string[] {
     .filter(([_, config]) => config.scope === scope)
     .map(([path]) => path);
 }
+
+export interface RouteAccess {
+  scope?: Scope;
+  permissions?: string[];
+  allowLoggedOnly?: boolean;
+}
+
+export function getRouteAccess(pathname: string): RouteAccess {
+  if (pathname === '/dashboard') {
+    return { allowLoggedOnly: true };
+  }
+
+  const routePermission = ROUTE_PERMISSIONS[pathname];
+  if (routePermission) {
+    return {
+      scope: routePermission.scope,
+      permissions: routePermission.permissions,
+    };
+  }
+
+  return { allowLoggedOnly: true };
+}

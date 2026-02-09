@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { X, ChevronDown, ChevronUp } from 'lucide-react';
 import { Modal } from '../ui/Modal';
 import { Input } from '../ui/Input';
 import { Select } from '../ui/Select';
@@ -20,6 +20,9 @@ export interface UserFormData {
   name: string;
   email: string;
   roleId: string | null;
+  status?: 'ACTIVE' | 'INACTIVE';
+  phone?: string;
+  jobTitle?: string;
 }
 
 export function UserFormModal({
@@ -35,7 +38,11 @@ export function UserFormModal({
     name: '',
     email: '',
     roleId: null,
+    status: 'ACTIVE',
+    phone: '',
+    jobTitle: '',
   });
+  const [showAdditionalFields, setShowAdditionalFields] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -43,14 +50,21 @@ export function UserFormModal({
         name: user.name,
         email: user.email,
         roleId: user.roleId,
+        status: 'ACTIVE',
+        phone: '',
+        jobTitle: '',
       });
     } else {
       setFormData({
         name: '',
         email: '',
         roleId: null,
+        status: 'ACTIVE',
+        phone: '',
+        jobTitle: '',
       });
     }
+    setShowAdditionalFields(false);
   }, [user, isOpen]);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -123,6 +137,58 @@ export function UserFormModal({
             </Select>
             <p className="mt-1 text-xs text-gray-500">
               O perfil define as permissões básicas do usuário
+            </p>
+          </div>
+
+          <div>
+            <Select
+              label="Status"
+              value={formData.status || 'ACTIVE'}
+              onChange={(e) => setFormData({ ...formData, status: e.target.value as 'ACTIVE' | 'INACTIVE' })}
+            >
+              <option value="ACTIVE">Ativo</option>
+              <option value="INACTIVE">Inativo</option>
+            </Select>
+            <p className="mt-1 text-xs text-gray-500">
+              Usuários inativos não podem acessar o sistema
+            </p>
+          </div>
+
+          <div>
+            <button
+              type="button"
+              onClick={() => setShowAdditionalFields(!showAdditionalFields)}
+              className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+            >
+              {showAdditionalFields ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              Dados adicionais (opcional)
+            </button>
+
+            {showAdditionalFields && (
+              <div className="mt-4 space-y-4 pl-6 border-l-2 border-gray-200">
+                <div>
+                  <Input
+                    label="Telefone"
+                    value={formData.phone || ''}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    placeholder="(11) 99999-9999"
+                  />
+                </div>
+                <div>
+                  <Input
+                    label="Cargo"
+                    value={formData.jobTitle || ''}
+                    onChange={(e) => setFormData({ ...formData, jobTitle: e.target.value })}
+                    placeholder="Ex: Analista de Sistemas"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
+            <p className="text-sm text-blue-800">
+              <span className="font-semibold">Nota:</span> Autenticação real (senha/Google/invite) será conectada na fase 2 via API/Supabase Auth.
             </p>
           </div>
 

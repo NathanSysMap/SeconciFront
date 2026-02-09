@@ -7,14 +7,7 @@ import { Badge } from '../../components/ui/Badge';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { UserFormModal, UserFormData } from '../../components/rbac/UserFormModal';
 import type { ManagedUser, Role } from '../../core/rbac/types';
-import {
-  listUsers,
-  createUser,
-  updateUser,
-  deleteUser,
-  listRoles,
-  getRoleById,
-} from '../../core/rbac/mockStore';
+import { usersService, rolesService } from '../../services';
 import { toast } from 'sonner';
 
 export default function AdminUsers() {
@@ -28,11 +21,11 @@ export default function AdminUsers() {
     loadData();
   }, []);
 
-  const loadData = () => {
-    const userData = listUsers('BACKOFFICE', null);
-    const roleData = listRoles('BACKOFFICE', null);
-    setUsers(userData);
-    setRoles(roleData);
+  const loadData = async () => {
+    const userData = await usersService.list('BACKOFFICE', null);
+    const roleData = await rolesService.list('BACKOFFICE', null);
+    setUsers(userData as ManagedUser[]);
+    setRoles(roleData as Role[]);
   };
 
   const handleCreate = () => {
@@ -45,36 +38,39 @@ export default function AdminUsers() {
     setIsFormOpen(true);
   };
 
-  const handleFormSubmit = (data: UserFormData) => {
-    if (editingUser) {
-      updateUser(editingUser.id, {
-        name: data.name,
-        roleId: data.roleId,
-      });
-      toast.success('Usuário atualizado com sucesso!');
-    } else {
-      createUser({
-        name: data.name,
-        email: data.email,
-        scope: 'BACKOFFICE',
-        tenantId: null,
-        roleId: data.roleId,
-        overrides: {},
-      });
-      toast.success('Usuário criado com sucesso!');
+  const handleFormSubmit = async (data: UserFormData) => {
+    try {
+      if (editingUser) {
+        await usersService.update(editingUser.id, {
+          name: data.name,
+          roleId: data.roleId,
+        });
+        toast.success('Usuário atualizado com sucesso!');
+      } else {
+        await usersService.create({
+          name: data.name,
+          email: data.email,
+          scope: 'BACKOFFICE',
+          tenantId: null,
+          roleId: data.roleId,
+        });
+        toast.success('Usuário criado com sucesso!');
+      }
+      setIsFormOpen(false);
+      loadData();
+    } catch (error) {
+      toast.error('Erro ao salvar usuário');
     }
-    setIsFormOpen(false);
-    loadData();
   };
 
-  const handleDelete = (user: ManagedUser) => {
+  const handleDelete = async (user: ManagedUser) => {
     if (confirm(`Tem certeza que deseja excluir o usuário "${user.name}"?`)) {
-      const result = deleteUser(user.id);
-      if (result.success) {
+      try {
+        await usersService.delete(user.id);
         toast.success('Usuário excluído com sucesso!');
         loadData();
-      } else {
-        toast.error(result.error || 'Erro ao excluir usuário');
+      } catch (error: any) {
+        toast.error(error.message || 'Erro ao excluir usuário');
       }
     }
   };
@@ -85,12 +81,12 @@ export default function AdminUsers() {
 
   const getUserRoleName = (roleId: string | null) => {
     if (!roleId) return 'Sem perfil';
-    const role = getRoleById(roleId);
+    const role = roles.find((r) => r.id === roleId);
     return role?.name || 'Perfil não encontrado';
   };
 
   const getOverrideCount = (user: ManagedUser) => {
-    return Object.keys(user.overrides).length;
+    return Object.keys(user.permissionOverrides || user.overrides || {}).length;
   };
 
   return (

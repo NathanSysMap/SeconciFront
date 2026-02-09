@@ -8,14 +8,7 @@ import { EmptyState } from '../../../components/ui/EmptyState';
 import { UserFormModal, UserFormData } from '../../../components/rbac/UserFormModal';
 import { useAuth } from '../../../core/auth/AuthContext';
 import type { ManagedUser, Role } from '../../../core/rbac/types';
-import {
-  listUsers,
-  createUser,
-  updateUser,
-  deleteUser,
-  listRoles,
-  getRoleById,
-} from '../../../core/rbac/mockStore';
+import { usersService, rolesService } from '../../../services';
 import { toast } from 'sonner';
 
 export default function PortalAdminUsers() {
@@ -32,12 +25,12 @@ export default function PortalAdminUsers() {
     loadData();
   }, [tenantId]);
 
-  const loadData = () => {
+  const loadData = async () => {
     if (!tenantId) return;
-    const userData = listUsers('PORTAL', tenantId);
-    const roleData = listRoles('PORTAL', tenantId);
-    setUsers(userData);
-    setRoles(roleData);
+    const userData = await usersService.list('PORTAL', tenantId);
+    const roleData = await rolesService.list('PORTAL', tenantId);
+    setUsers(userData as ManagedUser[]);
+    setRoles(roleData as Role[]);
   };
 
   const handleCreate = () => {
@@ -50,38 +43,41 @@ export default function PortalAdminUsers() {
     setIsFormOpen(true);
   };
 
-  const handleFormSubmit = (data: UserFormData) => {
+  const handleFormSubmit = async (data: UserFormData) => {
     if (!tenantId) return;
 
-    if (editingUser) {
-      updateUser(editingUser.id, {
-        name: data.name,
-        roleId: data.roleId,
-      });
-      toast.success('Usuário atualizado com sucesso!');
-    } else {
-      createUser({
-        name: data.name,
-        email: data.email,
-        scope: 'PORTAL',
-        tenantId: tenantId,
-        roleId: data.roleId,
-        overrides: {},
-      });
-      toast.success('Usuário criado com sucesso!');
+    try {
+      if (editingUser) {
+        await usersService.update(editingUser.id, {
+          name: data.name,
+          roleId: data.roleId,
+        });
+        toast.success('Usuário atualizado com sucesso!');
+      } else {
+        await usersService.create({
+          name: data.name,
+          email: data.email,
+          scope: 'PORTAL',
+          tenantId: tenantId,
+          roleId: data.roleId,
+        });
+        toast.success('Usuário criado com sucesso!');
+      }
+      setIsFormOpen(false);
+      loadData();
+    } catch (error) {
+      toast.error('Erro ao salvar usuário');
     }
-    setIsFormOpen(false);
-    loadData();
   };
 
-  const handleDelete = (user: ManagedUser) => {
+  const handleDelete = async (user: ManagedUser) => {
     if (confirm(`Tem certeza que deseja excluir o usuário "${user.name}"?`)) {
-      const result = deleteUser(user.id);
-      if (result.success) {
+      try {
+        await usersService.delete(user.id);
         toast.success('Usuário excluído com sucesso!');
         loadData();
-      } else {
-        toast.error(result.error || 'Erro ao excluir usuário');
+      } catch (error: any) {
+        toast.error(error.message || 'Erro ao excluir usuário');
       }
     }
   };
@@ -92,12 +88,12 @@ export default function PortalAdminUsers() {
 
   const getUserRoleName = (roleId: string | null) => {
     if (!roleId) return 'Sem perfil';
-    const role = getRoleById(roleId);
+    const role = roles.find((r) => r.id === roleId);
     return role?.name || 'Perfil não encontrado';
   };
 
   const getOverrideCount = (user: ManagedUser) => {
-    return Object.keys(user.overrides).length;
+    return Object.keys(user.permissionOverrides || user.overrides || {}).length;
   };
 
   if (!tenantId) {

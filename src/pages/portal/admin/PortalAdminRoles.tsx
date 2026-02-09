@@ -8,7 +8,7 @@ import { PermissionMatrix } from '../../../components/rbac/PermissionMatrix';
 import { Modal } from '../../../components/ui/Modal';
 import { useAuth } from '../../../core/auth/AuthContext';
 import type { Role } from '../../../core/rbac/types';
-import { listRoles, createRole, updateRole, deleteRole } from '../../../core/rbac/mockStore';
+import { rolesService } from '../../../services';
 import { toast } from 'sonner';
 
 export default function PortalAdminRoles() {
@@ -25,10 +25,10 @@ export default function PortalAdminRoles() {
     loadRoles();
   }, [tenantId]);
 
-  const loadRoles = () => {
+  const loadRoles = async () => {
     if (!tenantId) return;
-    const data = listRoles('PORTAL', tenantId);
-    setRoles(data);
+    const data = await rolesService.list('PORTAL', tenantId);
+    setRoles(data as Role[]);
   };
 
   const handleCreate = () => {
@@ -41,37 +41,41 @@ export default function PortalAdminRoles() {
     setIsFormOpen(true);
   };
 
-  const handleFormSubmit = (data: RoleFormData) => {
+  const handleFormSubmit = async (data: RoleFormData) => {
     if (!tenantId) return;
 
-    if (editingRole) {
-      updateRole(editingRole.id, {
-        name: data.name,
-        description: data.description,
-      });
-      toast.success('Perfil atualizado com sucesso!');
-    } else {
-      createRole({
-        name: data.name,
-        description: data.description,
-        scope: 'PORTAL',
-        tenantId: tenantId,
-        permissions: [],
-      });
-      toast.success('Perfil criado com sucesso!');
+    try {
+      if (editingRole) {
+        await rolesService.update(editingRole.id, {
+          name: data.name,
+          description: data.description,
+        });
+        toast.success('Perfil atualizado com sucesso!');
+      } else {
+        await rolesService.create({
+          name: data.name,
+          description: data.description,
+          scope: 'PORTAL',
+          tenantId: tenantId,
+          permissions: [],
+        });
+        toast.success('Perfil criado com sucesso!');
+      }
+      setIsFormOpen(false);
+      loadRoles();
+    } catch (error) {
+      toast.error('Erro ao salvar perfil');
     }
-    setIsFormOpen(false);
-    loadRoles();
   };
 
-  const handleDelete = (role: Role) => {
+  const handleDelete = async (role: Role) => {
     if (confirm(`Tem certeza que deseja excluir o perfil "${role.name}"?`)) {
-      const result = deleteRole(role.id);
-      if (result.success) {
+      try {
+        await rolesService.delete(role.id);
         toast.success('Perfil excluído com sucesso!');
         loadRoles();
-      } else {
-        toast.error(result.error || 'Erro ao excluir perfil');
+      } catch (error: any) {
+        toast.error(error.message || 'Erro ao excluir perfil');
       }
     }
   };
@@ -81,13 +85,17 @@ export default function PortalAdminRoles() {
     setIsPermissionsOpen(true);
   };
 
-  const handlePermissionsChange = (permissions: string[]) => {
+  const handlePermissionsChange = async (permissions: string[]) => {
     if (selectedRole) {
-      updateRole(selectedRole.id, { permissions });
-      const updated = { ...selectedRole, permissions };
-      setSelectedRole(updated);
-      toast.success('Permissões atualizadas!');
-      loadRoles();
+      try {
+        await rolesService.update(selectedRole.id, { permissions });
+        const updated = { ...selectedRole, permissions };
+        setSelectedRole(updated);
+        toast.success('Permissões atualizadas!');
+        loadRoles();
+      } catch (error) {
+        toast.error('Erro ao atualizar permissões');
+      }
     }
   };
 
