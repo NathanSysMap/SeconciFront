@@ -111,7 +111,7 @@ export default function AdminRoles() {
         <div className="grid gap-4">
           {roles.map((role) => (
             <Card key={role.id} className="hover:shadow-lg transition-shadow duration-200">
-              <div className="flex items-start justify-between gap-4">
+              <div className="flex items-center justify-between gap-6">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start gap-3">
                     <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
