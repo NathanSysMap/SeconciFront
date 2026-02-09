@@ -84,35 +84,37 @@ export default function PortalAdminUserOverrides() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col gap-4">
         <Button
           variant="outline"
           size="sm"
           onClick={() => navigate('/portal/admin/users')}
           icon={<ArrowLeft className="w-4 h-4" />}
+          className="self-start"
         >
-          Voltar
+          Voltar para Usuários
         </Button>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            Exceções de Permissões (Portal)
-          </h1>
-          <p className="text-gray-600 mt-1">
-            Configure exceções individuais de permissões para usuários
+          <h1 className="text-3xl font-bold text-gray-900">Exceções de Permissões</h1>
+          <p className="text-gray-600 mt-2 flex items-center gap-2">
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+              Portal
+            </span>
+            <span>Configure permissões individuais que sobrescrevem o perfil do usuário</span>
           </p>
         </div>
       </div>
 
-      <Card>
-        <div className="space-y-4">
+      <Card className="shadow-lg">
+        <div className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-semibold text-gray-900 mb-3">
               Selecione o usuário
             </label>
             <select
               value={selectedUser?.id || ''}
               onChange={(e) => handleUserChange(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
             >
               <option value="">Selecione um usuário...</option>
               {users.map((user) => {
@@ -127,19 +129,23 @@ export default function PortalAdminUserOverrides() {
           </div>
 
           {selectedUser ? (
-            <UserOverridesMatrix
-              scope="PORTAL"
-              user={selectedUser}
-              role={selectedRole}
-              onOverrideChange={handleOverrideChange}
-              onOverrideRemove={handleOverrideRemove}
-            />
+            <div className="pt-4 border-t">
+              <UserOverridesMatrix
+                scope="PORTAL"
+                user={selectedUser}
+                role={selectedRole}
+                onOverrideChange={handleOverrideChange}
+                onOverrideRemove={handleOverrideRemove}
+              />
+            </div>
           ) : (
-            <EmptyState
-              icon={Users}
-              title="Selecione um usuário"
-              description="Escolha um usuário acima para gerenciar suas exceções de permissões"
-            />
+            <div className="py-8">
+              <EmptyState
+                icon={Users}
+                title="Selecione um usuário"
+                description="Escolha um usuário acima para gerenciar suas exceções de permissões"
+              />
+            </div>
           )}
         </div>
       </Card>

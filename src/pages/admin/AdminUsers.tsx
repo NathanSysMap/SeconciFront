@@ -95,12 +95,17 @@ export default function AdminUsers() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Usuários (Backoffice)</h1>
-          <p className="text-gray-600 mt-1">Gerencie os usuários do backoffice</p>
+          <h1 className="text-3xl font-bold text-gray-900">Usuários</h1>
+          <p className="text-gray-600 mt-2 flex items-center gap-2">
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+              Backoffice
+            </span>
+            <span>Gerencie os usuários e seus acessos</span>
+          </p>
         </div>
-        <Button onClick={handleCreate} icon={<Plus className="w-4 h-4" />}>
+        <Button onClick={handleCreate} icon={<Plus className="w-5 h-5" />} className="shadow-sm">
           Novo Usuário
         </Button>
       </div>
@@ -117,33 +122,44 @@ export default function AdminUsers() {
             const overrideCount = getOverrideCount(user);
 
             return (
-              <Card key={user.id}>
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-900">{user.name}</h3>
-                    <p className="text-gray-600 mt-1">{user.email}</p>
-                    <div className="flex gap-2 mt-3">
-                      <Badge variant="secondary">{getUserRoleName(user.roleId)}</Badge>
-                      {overrideCount > 0 && (
-                        <Badge variant="warning">{overrideCount} exceções</Badge>
-                      )}
+              <Card key={user.id} className="hover:shadow-lg transition-shadow duration-200">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start gap-3">
+                      <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-gray-500 to-gray-600 rounded-lg flex items-center justify-center">
+                        <Users className="w-5 h-5 text-white" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-lg font-semibold text-gray-900 truncate">{user.name}</h3>
+                        <p className="text-gray-600 mt-1 text-sm truncate">{user.email}</p>
+                        <div className="flex flex-wrap items-center gap-2 mt-3">
+                          <Badge variant="secondary">{getUserRoleName(user.roleId)}</Badge>
+                          {overrideCount > 0 && (
+                            <Badge variant="warning">
+                              {overrideCount} {overrideCount === 1 ? 'exceção' : 'exceções'}
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => handleManageOverrides(user)}
                       title="Gerenciar exceções de permissões"
+                      className="whitespace-nowrap"
                     >
-                      <Settings className="w-4 h-4" />
+                      <Settings className="w-4 h-4 mr-1" />
                       Exceções
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => handleEdit(user)}
+                      title="Editar usuário"
                     >
                       <Edit2 className="w-4 h-4" />
                     </Button>
@@ -151,6 +167,8 @@ export default function AdminUsers() {
                       variant="outline"
                       size="sm"
                       onClick={() => handleDelete(user)}
+                      title="Excluir usuário"
+                      className="hover:border-red-300 hover:text-red-600"
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>

@@ -86,12 +86,17 @@ export default function AdminRoles() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Perfis (Backoffice)</h1>
-          <p className="text-gray-600 mt-1">Gerencie os perfis de acesso do backoffice</p>
+          <h1 className="text-3xl font-bold text-gray-900">Perfis</h1>
+          <p className="text-gray-600 mt-2 flex items-center gap-2">
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+              Backoffice
+            </span>
+            <span>Gerencie os perfis de acesso do sistema</span>
+          </p>
         </div>
-        <Button onClick={handleCreate} icon={<Plus className="w-4 h-4" />}>
+        <Button onClick={handleCreate} icon={<Plus className="w-5 h-5" />} className="shadow-sm">
           Novo Perfil
         </Button>
       </div>
@@ -105,33 +110,43 @@ export default function AdminRoles() {
       ) : (
         <div className="grid gap-4">
           {roles.map((role) => (
-            <Card key={role.id}>
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-gray-900">{role.name}</h3>
-                  {role.description && (
-                    <p className="text-gray-600 mt-1">{role.description}</p>
-                  )}
-                  <div className="flex gap-4 mt-3 text-sm text-gray-500">
-                    <span>{role.permissions.length} permissões</span>
-                    <span>•</span>
-                    <span>Backoffice</span>
+            <Card key={role.id} className="hover:shadow-lg transition-shadow duration-200">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                      <Shield className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-lg font-semibold text-gray-900 truncate">{role.name}</h3>
+                      {role.description && (
+                        <p className="text-gray-600 mt-1 line-clamp-2">{role.description}</p>
+                      )}
+                      <div className="flex items-center gap-4 mt-3">
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                          {role.permissions.length} {role.permissions.length === 1 ? 'permissão' : 'permissões'}
+                        </span>
+                        <span className="text-xs text-gray-500">Escopo: Backoffice</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => handleManagePermissions(role)}
+                    className="whitespace-nowrap"
                   >
-                    <Shield className="w-4 h-4" />
+                    <Shield className="w-4 h-4 mr-1" />
                     Permissões
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => handleEdit(role)}
+                    title="Editar perfil"
                   >
                     <Edit2 className="w-4 h-4" />
                   </Button>
@@ -139,6 +154,8 @@ export default function AdminRoles() {
                     variant="outline"
                     size="sm"
                     onClick={() => handleDelete(role)}
+                    title="Excluir perfil"
+                    className="hover:border-red-300 hover:text-red-600"
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>
@@ -160,14 +177,24 @@ export default function AdminRoles() {
 
       {selectedRole && (
         <Modal isOpen={isPermissionsOpen} onClose={() => setIsPermissionsOpen(false)}>
-          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-            <div className="p-6 border-b">
-              <h2 className="text-xl font-semibold text-gray-900">
-                Permissões: {selectedRole.name}
-              </h2>
+          <div className="bg-white rounded-xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="p-6 border-b bg-gradient-to-r from-blue-50 to-blue-100">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                  <Shield className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    Gerenciar Permissões
+                  </h2>
+                  <p className="text-sm text-gray-600 mt-1">
+                    Perfil: <span className="font-semibold">{selectedRole.name}</span>
+                  </p>
+                </div>
+              </div>
             </div>
 
-            <div className="p-6 overflow-y-auto flex-1">
+            <div className="p-6 overflow-y-auto flex-1 bg-gray-50">
               <PermissionMatrix
                 scope="BACKOFFICE"
                 selectedPermissions={selectedRole.permissions}
@@ -175,8 +202,8 @@ export default function AdminRoles() {
               />
             </div>
 
-            <div className="p-6 border-t flex justify-end">
-              <Button onClick={() => setIsPermissionsOpen(false)}>
+            <div className="p-6 border-t bg-white flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setIsPermissionsOpen(false)}>
                 Fechar
               </Button>
             </div>
