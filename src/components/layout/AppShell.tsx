@@ -90,7 +90,7 @@ export function AppShell({ children }: AppShellProps) {
       ],
       roles: ['admin', 'operational'],
     },
-    {
+/*    {
       name: 'Relatórios',
       icon: BarChart3,
       scope: 'BACKOFFICE' as Scope,
@@ -100,7 +100,7 @@ export function AppShell({ children }: AppShellProps) {
         { name: 'Sobre a Aplicação', href: '/relatorios/sobre' },
       ],
       roles: ['admin', 'operational', 'company'],
-    },
+    },*/
     {
       name: 'Administração',
       icon: Shield,
