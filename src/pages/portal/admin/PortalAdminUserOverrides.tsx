@@ -105,7 +105,7 @@ export default function PortalAdminUserOverrides() {
         </div>
       </div>
 
-      <Card className="shadow-lg">
+      <Card className="shadow-lg p-6">
         <div className="space-y-6">
           <div>
             <label className="block text-sm font-semibold text-gray-900 mb-3">
@@ -129,7 +129,7 @@ export default function PortalAdminUserOverrides() {
           </div>
 
           {selectedUser ? (
-            <div className="pt-4 border-t">
+            <div className="pt-6 border-t">
               <UserOverridesMatrix
                 scope="PORTAL"
                 user={selectedUser}
